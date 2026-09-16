@@ -1,5 +1,14 @@
+type EventHandler = (event: Event) => void;
+type MessageEventHandler = (event: MessageEvent) => void;
+type CloseEventHandler = (event: CloseEvent) => void;
+
 export class WebSocketClient {
   private ws: WebSocket | null = null;
+
+  private handleOpen?: EventHandler;
+  private handleMessage?: MessageEventHandler;
+  private handleError?: EventHandler;
+  private handleClose?: CloseEventHandler;
 
   constructor(private readonly url: string) {}
 
@@ -32,24 +41,19 @@ export class WebSocketClient {
     this.ws?.close();
   }
 
-  private handleOpen?: (event: Event) => void;
-  private handleMessage?: (event: MessageEvent) => void;
-  private handleError?: (event: Event) => void;
-  private handleClose?: (event: CloseEvent) => void;
-
-  onOpen(handler: (event: Event) => void): void {
+  onOpen(handler: EventHandler): void {
     this.handleOpen = handler;
   }
 
-  onMessage(handler: (event: MessageEvent) => void): void {
+  onMessage(handler: MessageEventHandler): void {
     this.handleMessage = handler;
   }
 
-  onError(handler: (event: Event) => void): void {
+  onError(handler: EventHandler): void {
     this.handleError = handler;
   }
 
-  onClose(handler: (event: CloseEvent) => void): void {
+  onClose(handler: CloseEventHandler): void {
     this.handleClose = handler;
   }
 }
