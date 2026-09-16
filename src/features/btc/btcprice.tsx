@@ -3,30 +3,44 @@ import { WebSocketClient } from "../../websocket/webSocketClient";
 
 type ConnectionStatus = "connecting" | "connected" | "error" | "disconnected";
 
-type BinanceTradeMessage = {
+type BinanceTrade = {
   e: "trade";
   s: string;
   p: string;
 };
 
-const BTC_STREAM_URL = "wss://stream.binance.com:443/ws/btcusdt@trade";
+type BinanceCombinedMessage = {
+  stream: string;
+  data: BinanceTrade;
+};
+
+const SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"] as const;
+
+const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${SYMBOLS.map(
+  (symbol) => `${symbol.toLowerCase()}@trade`,
+).join("/")}`;
 
 export function BtcPrice() {
-  const [price, setPrice] = useState<string | null>(null);
+  const [prices, setPrices] = useState<Record<string, string>>({});
 
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
-    const client = new WebSocketClient(BTC_STREAM_URL);
+    const client = new WebSocketClient(STREAM_URL);
 
     client.onOpen(() => {
       setStatus("connected");
     });
 
     client.onMessage((event) => {
-      const data: BinanceTradeMessage = JSON.parse(event.data);
+      const message: BinanceCombinedMessage = JSON.parse(event.data);
 
-      setPrice(data.p);
+      const { s: symbol, p: price } = message.data;
+
+      setPrices((currentPrices) => ({
+        ...currentPrices,
+        [symbol]: price,
+      }));
     });
 
     client.onError(() => {
@@ -46,11 +60,13 @@ export function BtcPrice() {
 
   return (
     <div>
-      <h2>BTC/USDT</h2>
+      <h2>Crypto Prices</h2>
 
-      <p>Status: {status}</p>
-
-      <p>Price: {price ?? "---"}</p>
+      {SYMBOLS.map((symbol) => (
+        <p key={symbol}>
+          {symbol}: {prices[symbol] ?? "---"}
+        </p>
+      ))}
     </div>
   );
 }
