@@ -5,7 +5,7 @@ type ConnectionStatus = "connecting" | "connected" | "error" | "disconnected";
 
 type BinanceTrade = {
   e: "trade";
-  s: string;
+  s: Symbol;
   p: string;
 };
 
@@ -16,12 +16,14 @@ type BinanceCombinedMessage = {
 
 const SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"] as const;
 
+type Symbol = (typeof SYMBOLS)[number];
+
 const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${SYMBOLS.map(
   (symbol) => `${symbol.toLowerCase()}@trade`,
 ).join("/")}`;
 
 export function BtcPrice() {
-  const [prices, setPrices] = useState<Record<string, string>>({});
+  const [prices, setPrices] = useState<Partial<Record<Symbol, string>>>({});
 
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
