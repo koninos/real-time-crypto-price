@@ -22,7 +22,7 @@ const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${SYMBOLS.map(
   (symbol) => `${symbol.toLowerCase()}@trade`,
 ).join("/")}`;
 
-export function BtcPrice() {
+export function CryptoPrice() {
   const [prices, setPrices] = useState<Partial<Record<Symbol, string>>>({});
 
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
