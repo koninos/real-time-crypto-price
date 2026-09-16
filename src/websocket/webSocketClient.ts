@@ -41,6 +41,14 @@ export class WebSocketClient {
     this.ws?.close();
   }
 
+  send(message: string): void {
+    if (this.ws?.readyState !== WebSocket.OPEN) {
+      throw new Error("WebSocket is not connected");
+    }
+
+    this.ws.send(message);
+  }
+
   onOpen(handler: EventHandler): void {
     this.handleOpen = handler;
   }

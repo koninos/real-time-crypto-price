@@ -15,11 +15,25 @@ type BinanceCombinedMessage = {
   data: BinanceTrade;
 };
 
-const SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"] as const;
+type BinanceSubscriptionResponse = {
+  result: null;
+  id: number;
+};
 
-type Symbol = (typeof SYMBOLS)[number];
+type BinanceMessage = BinanceCombinedMessage | BinanceSubscriptionResponse;
 
-const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${SYMBOLS.map(
+const AVAILABLE_SYMBOLS = [
+  "BTCUSDT",
+  "ETHUSDT",
+  "SOLUSDT",
+  "DOGEUSDT",
+] as const;
+
+type Symbol = (typeof AVAILABLE_SYMBOLS)[number];
+
+const INITIAL_SYMBOLS: Symbol[] = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
+
+const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${INITIAL_SYMBOLS.map(
   (symbol) => `${symbol.toLowerCase()}@trade`,
 ).join("/")}`;
 
@@ -33,17 +47,27 @@ export function CryptoPrice() {
 
     client.onOpen(() => {
       setStatus("connected");
+
+      client.send(
+        JSON.stringify({
+          method: "SUBSCRIBE",
+          params: ["dogeusdt@trade"],
+          id: 1,
+        }),
+      );
     });
 
     client.onMessage((event) => {
-      const message: BinanceCombinedMessage = JSON.parse(event.data);
+      const message: BinanceMessage = JSON.parse(event.data);
 
-      const { s: symbol, p: price } = message.data;
+      if ("data" in message) {
+        const { s: symbol, p: price } = message.data;
 
-      setPrices((currentPrices) => ({
-        ...currentPrices,
-        [symbol]: price,
-      }));
+        setPrices((currentPrices) => ({
+          ...currentPrices,
+          [symbol]: price,
+        }));
+      }
     });
 
     client.onError(() => {
@@ -64,8 +88,9 @@ export function CryptoPrice() {
   return (
     <div>
       <h2>Crypto Prices</h2>
+      <p>Status: {status}</p>
 
-      {SYMBOLS.map((symbol) => (
+      {AVAILABLE_SYMBOLS.map((symbol) => (
         <PriceRow key={symbol} symbol={symbol} price={prices[symbol]} />
       ))}
     </div>
