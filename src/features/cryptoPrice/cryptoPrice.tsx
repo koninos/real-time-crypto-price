@@ -38,9 +38,24 @@ const STREAM_URL = `wss://stream.binance.com:9443/stream?streams=${INITIAL_SYMBO
 ).join("/")}`;
 
 export function CryptoPrice() {
+  const [subscribedSymbols, setSubscribedSymbols] =
+    useState<Symbol[]>(INITIAL_SYMBOLS);
+
   const [prices, setPrices] = useState<Partial<Record<Symbol, string>>>({});
 
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
+
+  const toggleSymbol = (symbol: Symbol) => {
+    setSubscribedSymbols((currentSymbols) => {
+      if (currentSymbols.includes(symbol)) {
+        return currentSymbols.filter(
+          (currentSymbol) => currentSymbol !== symbol,
+        );
+      }
+
+      return [...currentSymbols, symbol];
+    });
+  };
 
   useEffect(() => {
     const client = new WebSocketClient(STREAM_URL);
@@ -87,10 +102,29 @@ export function CryptoPrice() {
 
   return (
     <div>
+      <section>
+        <h2>Symbols</h2>
+        <ul>
+          {AVAILABLE_SYMBOLS.map((symbol) => (
+            <li key={symbol}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={subscribedSymbols.includes(symbol)}
+                  onChange={() => toggleSymbol(symbol)}
+                />
+
+                {symbol}
+              </label>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <h2>Crypto Prices</h2>
       <p>Status: {status}</p>
 
-      {AVAILABLE_SYMBOLS.map((symbol) => (
+      {INITIAL_SYMBOLS.map((symbol) => (
         <PriceRow key={symbol} symbol={symbol} price={prices[symbol]} />
       ))}
     </div>
