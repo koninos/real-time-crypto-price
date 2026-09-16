@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { WebSocketClient } from "../../websocket/webSocketClient";
+import { PriceRow } from "./priceRow";
 
 type ConnectionStatus = "connecting" | "connected" | "error" | "disconnected";
 
@@ -65,9 +66,7 @@ export function CryptoPrice() {
       <h2>Crypto Prices</h2>
 
       {SYMBOLS.map((symbol) => (
-        <p key={symbol}>
-          {symbol}: {prices[symbol] ?? "---"}
-        </p>
+        <PriceRow key={symbol} symbol={symbol} price={prices[symbol]} />
       ))}
     </div>
   );
