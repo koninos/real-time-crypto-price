@@ -3,6 +3,7 @@ import { WebSocketClient } from "../../websocket/webSocketClient";
 import { PriceRow } from "./priceRow";
 import type { BinanceMessage, ConnectionStatus, Symbol } from "./types";
 import { AVAILABLE_SYMBOLS, INITIAL_SYMBOLS, STREAM_URL } from "./constants";
+import { subscribe, unsubscribe } from "./binanceService";
 
 let requestId = 1;
 
@@ -100,29 +101,6 @@ export function CryptoPrices() {
       clientRef.current = null;
     };
   }, []);
-  /*
-  useEffect(() => {
-    const activeSubscriptions = activeSubscriptionsRef.current;
-
-    const desiredSubscriptions = new Set(subscribedSymbols);
-
-    // Subscribe to newly requested symbols
-    for (const symbol of desiredSubscriptions) {
-      if (!activeSubscriptions.has(symbol)) {
-        subscribe(symbol);
-        activeSubscriptions.add(symbol);
-      }
-    }
-
-    // Unsubscribe from symbols no longer requested
-    for (const symbol of activeSubscriptions) {
-      if (!desiredSubscriptions.has(symbol)) {
-        unsubscribe(symbol);
-        activeSubscriptions.delete(symbol);
-      }
-    }
-  }, [subscribedSymbols]);
-*/
 
   useEffect(() => {
     const client = clientRef.current;
@@ -141,29 +119,9 @@ export function CryptoPrices() {
       (symbol) => !subscribedSymbols.includes(symbol),
     );
 
-    if (symbolsToSubscribe.length > 0) {
-      client.send(
-        JSON.stringify({
-          method: "SUBSCRIBE",
-          params: symbolsToSubscribe.map(
-            (symbol) => `${symbol.toLowerCase()}@trade`,
-          ),
-          id: nextRequestId(),
-        }),
-      );
-    }
+    subscribe(client, symbolsToSubscribe, nextRequestId());
 
-    if (symbolsToUnsubscribe.length > 0) {
-      client.send(
-        JSON.stringify({
-          method: "UNSUBSCRIBE",
-          params: symbolsToUnsubscribe.map(
-            (symbol) => `${symbol.toLowerCase()}@trade`,
-          ),
-          id: nextRequestId(),
-        }),
-      );
-    }
+    unsubscribe(client, symbolsToUnsubscribe, nextRequestId());
 
     symbolsToSubscribe.forEach((symbol) => activeSubscriptions.add(symbol));
 
