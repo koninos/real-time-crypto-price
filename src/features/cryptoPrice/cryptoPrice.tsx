@@ -43,6 +43,8 @@ export function CryptoPrice() {
   const [subscribedSymbols, setSubscribedSymbols] =
     useState<Symbol[]>(INITIAL_SYMBOLS);
 
+  const subscribedSymbolsRef = useRef<Symbol[]>(INITIAL_SYMBOLS);
+
   const activeSubscriptionsRef = useRef<Set<Symbol>>(new Set(INITIAL_SYMBOLS));
 
   const [prices, setPrices] = useState<Partial<Record<Symbol, string>>>({});
@@ -65,6 +67,10 @@ export function CryptoPrice() {
   };
 
   useEffect(() => {
+    subscribedSymbolsRef.current = subscribedSymbols;
+  }, [subscribedSymbols]);
+
+  useEffect(() => {
     const client = new WebSocketClient(STREAM_URL);
 
     clientRef.current = client;
@@ -73,15 +79,23 @@ export function CryptoPrice() {
       setStatus("connected");
       setIsConnected(true);
 
+      activeSubscriptionsRef.current.clear();
+
+      const symbolsWithSub = subscribedSymbolsRef.current;
+
       client.send(
         JSON.stringify({
           method: "SUBSCRIBE",
-          params: INITIAL_SYMBOLS.map(
+          params: symbolsWithSub.map(
             (symbol) => `${symbol.toLowerCase()}@trade`,
           ),
           id: nextRequestId(),
         }),
       );
+
+      symbolsWithSub.forEach((symbol) => {
+        activeSubscriptionsRef.current.add(symbol);
+      });
     });
 
     client.onMessage((event) => {
@@ -146,12 +160,10 @@ export function CryptoPrice() {
 
     const activeSubscriptions = activeSubscriptionsRef.current;
 
-    // Symbols that React wants but WebSocket doesn't have
     const symbolsToSubscribe = subscribedSymbols.filter(
       (symbol) => !activeSubscriptions.has(symbol),
     );
 
-    // Symbols that WebSocket has but React no longer wants
     const symbolsToUnsubscribe = Array.from(activeSubscriptions).filter(
       (symbol) => !subscribedSymbols.includes(symbol),
     );
