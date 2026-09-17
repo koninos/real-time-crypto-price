@@ -16,6 +16,12 @@ export type BinanceTrade = {
   p: string;
 };
 
+export type BinanceError = {
+  code: number;
+  msg: string;
+  id?: number;
+};
+
 export type BinanceCombinedMessage = {
   stream: string;
   data: BinanceTrade;
@@ -28,4 +34,10 @@ export type BinanceSubscriptionResponse = {
 
 export type BinanceMessage =
   | BinanceCombinedMessage
-  | BinanceSubscriptionResponse;
+  | BinanceSubscriptionResponse
+  | BinanceError;
+
+export type PendingRequest = {
+  type: "subscribe" | "unsubscribe";
+  symbols: Symbol[];
+};

@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { WebSocketClient } from "../../websocket/webSocketClient";
 import { PriceRow } from "./priceRow";
-import type { BinanceMessage, ConnectionStatus, Symbol } from "./types";
+import type {
+  BinanceMessage,
+  ConnectionStatus,
+  PendingRequest,
+  Symbol,
+} from "./types";
 import { AVAILABLE_SYMBOLS, INITIAL_SYMBOLS, STREAM_URL } from "./constants";
 import { subscribe, unsubscribe } from "./binanceService";
 
@@ -23,6 +28,8 @@ export function CryptoPrices() {
   const [isConnected, setIsConnected] = useState(false);
 
   const clientRef = useRef<WebSocketClient | null>(null);
+
+  const pendingRequestsRef = useRef(new Map<number, PendingRequest>());
 
   const toggleSymbol = (symbol: Symbol) => {
     setSubscribedSymbols((currentSymbols) => {
@@ -75,6 +82,7 @@ export function CryptoPrices() {
     client.onMessage((event) => {
       const message: BinanceMessage = JSON.parse(event.data);
 
+      // Price response
       if ("data" in message) {
         const { s: symbol, p: price } = message.data;
 
@@ -82,6 +90,39 @@ export function CryptoPrices() {
           ...currentPrices,
           [symbol]: price,
         }));
+
+        return;
+      }
+
+      // Subscription response
+      if ("result" in message) {
+        const pendingRequestId = message.id;
+        const pendingRequest = pendingRequestsRef.current.get(pendingRequestId);
+
+        if (!pendingRequest) {
+          return;
+        }
+
+        if (pendingRequest.type === "subscribe") {
+          pendingRequest.symbols.forEach((symbol) => {
+            activeSubscriptionsRef.current.add(symbol);
+          });
+        } else {
+          pendingRequest.symbols.forEach((symbol) => {
+            activeSubscriptionsRef.current.delete(symbol);
+          });
+        }
+
+        pendingRequestsRef.current.delete(pendingRequestId);
+
+        return;
+      }
+
+      // Error response
+      if ("code" in message) {
+        console.error("Binance request failed:", message);
+
+        pendingRequestsRef.current.delete(message.id as number);
       }
     });
 
@@ -119,9 +160,27 @@ export function CryptoPrices() {
       (symbol) => !subscribedSymbols.includes(symbol),
     );
 
-    subscribe(client, symbolsToSubscribe, nextRequestId());
+    if (symbolsToSubscribe.length > 0) {
+      const requestId = nextRequestId();
 
-    unsubscribe(client, symbolsToUnsubscribe, nextRequestId());
+      pendingRequestsRef.current.set(requestId, {
+        type: "subscribe",
+        symbols: symbolsToSubscribe,
+      });
+
+      subscribe(client, symbolsToSubscribe, requestId);
+    }
+
+    if (symbolsToUnsubscribe.length > 0) {
+      const requestId = nextRequestId();
+
+      pendingRequestsRef.current.set(requestId, {
+        type: "unsubscribe",
+        symbols: symbolsToUnsubscribe,
+      });
+
+      unsubscribe(client, symbolsToUnsubscribe, requestId);
+    }
 
     symbolsToSubscribe.forEach((symbol) => activeSubscriptions.add(symbol));
 
