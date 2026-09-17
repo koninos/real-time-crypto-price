@@ -1,45 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { WebSocketClient } from "../../websocket/webSocketClient";
 import { PriceRow } from "./priceRow";
-
-type ConnectionStatus = "connecting" | "connected" | "error" | "disconnected";
-
-type BinanceTrade = {
-  e: "trade";
-  s: Symbol;
-  p: string;
-};
-
-type BinanceCombinedMessage = {
-  stream: string;
-  data: BinanceTrade;
-};
-
-type BinanceSubscriptionResponse = {
-  result: null;
-  id: number;
-};
-
-type BinanceMessage = BinanceCombinedMessage | BinanceSubscriptionResponse;
-
-const AVAILABLE_SYMBOLS = [
-  "BTCUSDT",
-  "ETHUSDT",
-  "SOLUSDT",
-  "DOGEUSDT",
-] as const;
-
-type Symbol = (typeof AVAILABLE_SYMBOLS)[number];
-
-const INITIAL_SYMBOLS: Symbol[] = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
-
-const STREAM_URL = "wss://stream.binance.com:9443/stream";
+import type { BinanceMessage, ConnectionStatus, Symbol } from "./types";
+import { AVAILABLE_SYMBOLS, INITIAL_SYMBOLS, STREAM_URL } from "./constants";
 
 let requestId = 1;
 
 const nextRequestId = () => requestId++;
 
-export function CryptoPrice() {
+export function CryptoPrices() {
   const [subscribedSymbols, setSubscribedSymbols] =
     useState<Symbol[]>(INITIAL_SYMBOLS);
 
@@ -82,6 +51,10 @@ export function CryptoPrice() {
       activeSubscriptionsRef.current.clear();
 
       const symbolsWithSub = subscribedSymbolsRef.current;
+
+      if (symbolsWithSub.length === 0) {
+        return;
+      }
 
       client.send(
         JSON.stringify({

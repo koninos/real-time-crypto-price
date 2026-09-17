@@ -1,10 +1,10 @@
 import "./App.css";
-import { CryptoPrice } from "./features/cryptoPrice/cryptoPrice";
+import { CryptoPrices } from "./features/cryptoPrices/cryptoPrices";
 
 function App() {
   return (
     <section id="center">
-      <CryptoPrice />
+      <CryptoPrices />
     </section>
   );
 }
