@@ -10,6 +10,10 @@ export class WebSocketClient {
   private handleError?: EventHandler;
   private handleClose?: CloseEventHandler;
 
+  get isConnected(): boolean {
+  return this.ws?.readyState === WebSocket.OPEN;
+}
+
   constructor(private readonly url: string) {}
 
   connect(): void {
