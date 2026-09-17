@@ -43,6 +43,58 @@ export function CryptoPrices() {
     });
   };
 
+  const hasPendingRequest = (symbol: Symbol) => {
+    return Array.from(pendingRequestsRef.current.values()).some((request) =>
+      request.symbols.includes(symbol),
+    );
+  };
+
+  const synchronizeSubscriptions = () => {
+    const client = clientRef.current;
+
+    if (!client || !isConnected) {
+      return;
+    }
+
+    const desiredSubscriptions = subscribedSymbolsRef.current;
+
+    const activeSubscriptions = activeSubscriptionsRef.current;
+
+    const pendingRequests = pendingRequestsRef.current;
+
+    const symbolsToSubscribe = desiredSubscriptions.filter(
+      (symbol) =>
+        !activeSubscriptions.has(symbol) && !hasPendingRequest(symbol),
+    );
+
+    const symbolsToUnsubscribe = Array.from(activeSubscriptions).filter(
+      (symbol) =>
+        !desiredSubscriptions.includes(symbol) && !hasPendingRequest(symbol),
+    );
+
+    if (symbolsToSubscribe.length > 0) {
+      const requestId = nextRequestId();
+
+      pendingRequests.set(requestId, {
+        type: "subscribe",
+        symbols: symbolsToSubscribe,
+      });
+
+      subscribe(client, symbolsToSubscribe, requestId);
+    }
+
+    if (symbolsToUnsubscribe.length > 0) {
+      const requestId = nextRequestId();
+
+      pendingRequests.set(requestId, {
+        type: "unsubscribe",
+        symbols: symbolsToUnsubscribe,
+      });
+
+      unsubscribe(client, symbolsToUnsubscribe, requestId);
+    }
+  };
+
   useEffect(() => {
     subscribedSymbolsRef.current = subscribedSymbols;
   }, [subscribedSymbols]);
@@ -115,6 +167,8 @@ export function CryptoPrices() {
 
         pendingRequestsRef.current.delete(pendingRequestId);
 
+        synchronizeSubscriptions();
+
         return;
       }
 
@@ -144,49 +198,7 @@ export function CryptoPrices() {
   }, []);
 
   useEffect(() => {
-    const client = clientRef.current;
-
-    if (!client || !isConnected) {
-      return;
-    }
-
-    const activeSubscriptions = activeSubscriptionsRef.current;
-
-    const symbolsToSubscribe = subscribedSymbols.filter(
-      (symbol) => !activeSubscriptions.has(symbol),
-    );
-
-    const symbolsToUnsubscribe = Array.from(activeSubscriptions).filter(
-      (symbol) => !subscribedSymbols.includes(symbol),
-    );
-
-    if (symbolsToSubscribe.length > 0) {
-      const requestId = nextRequestId();
-
-      pendingRequestsRef.current.set(requestId, {
-        type: "subscribe",
-        symbols: symbolsToSubscribe,
-      });
-
-      subscribe(client, symbolsToSubscribe, requestId);
-    }
-
-    if (symbolsToUnsubscribe.length > 0) {
-      const requestId = nextRequestId();
-
-      pendingRequestsRef.current.set(requestId, {
-        type: "unsubscribe",
-        symbols: symbolsToUnsubscribe,
-      });
-
-      unsubscribe(client, symbolsToUnsubscribe, requestId);
-    }
-
-    symbolsToSubscribe.forEach((symbol) => activeSubscriptions.add(symbol));
-
-    symbolsToUnsubscribe.forEach((symbol) =>
-      activeSubscriptions.delete(symbol),
-    );
+    synchronizeSubscriptions();
   }, [subscribedSymbols, isConnected]);
 
   return (
