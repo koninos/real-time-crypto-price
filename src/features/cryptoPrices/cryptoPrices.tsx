@@ -66,6 +66,8 @@ export function CryptoPrices() {
 
       if ("code" in message) {
         console.error("Binance request failed:", message);
+
+        subscriptionManager.handleError(message.id);
       }
     });
 

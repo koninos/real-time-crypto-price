@@ -65,6 +65,14 @@ export class BinanceSubscriptionManager {
     this.synchronize(desiredSymbols);
   }
 
+  handleError(id?: number): void {
+  if (id === undefined) {
+    return;
+  }
+
+  this.pendingRequests.delete(id);
+}
+
   onConnected(desiredSymbols: Symbol[]): void {
     this.reset();
     this.synchronize(desiredSymbols);
