@@ -5,13 +5,11 @@ export const AVAILABLE_SYMBOLS: Symbol[] = [
   "ETHUSDT",
   "SOLUSDT",
   "DOGEUSDT",
+  "XRPUSDT",
+  "BNBUSDT",
+  "TRXUSDT",
 ];
 
-export const INITIAL_SYMBOLS: Symbol[] = [
-  "BTCUSDT",
-  "ETHUSDT",
-  "SOLUSDT",
-];
+export const INITIAL_SYMBOLS: Symbol[] = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
 
-export const STREAM_URL =
-  "wss://stream.binance.com:9443/stream";
+export const STREAM_URL = "wss://stream.binance.com:9443/stream";

@@ -22,7 +22,7 @@ export const PriceRow = memo(function PriceRow({
       <th scope="row">{symbol}</th>
 
       <td className={`price price--${data?.direction ?? "same"}`}>
-        {data ? Number(data.price).toFixed(2) : "---"}
+        {data ? Number(data.price).toFixed(4) : "---"}
 
         {data?.direction !== "same" && (
           <>

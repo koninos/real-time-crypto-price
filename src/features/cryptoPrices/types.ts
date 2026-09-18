@@ -2,7 +2,10 @@ export type Symbol =
   | "BTCUSDT"
   | "ETHUSDT"
   | "SOLUSDT"
-  | "DOGEUSDT";
+  | "DOGEUSDT"
+  | "XRPUSDT"
+  | "BNBUSDT"
+  | "TRXUSDT";
 
 export type ConnectionStatus =
   | "connecting"
