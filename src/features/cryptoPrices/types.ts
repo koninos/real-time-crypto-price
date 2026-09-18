@@ -41,3 +41,10 @@ export type PendingRequest = {
   type: "subscribe" | "unsubscribe";
   symbols: Symbol[];
 };
+
+export type PriceDirection = "up" | "down" | "same";
+
+export type PriceData = {
+  price: string;
+  direction: PriceDirection;
+};

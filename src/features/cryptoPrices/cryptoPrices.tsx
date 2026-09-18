@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AVAILABLE_SYMBOLS, INITIAL_SYMBOLS, STREAM_URL } from "./constants";
-import type { BinanceMessage, ConnectionStatus, Symbol } from "./types";
+import type {
+  BinanceMessage,
+  ConnectionStatus,
+  PriceData,
+  PriceDirection,
+  Symbol,
+} from "./types";
 
 import { BinanceSubscriptionManager } from "./binanceSubscriptionManager";
 import { WebSocketClient } from "../../websocket/webSocketClient";
 import { PriceRow } from "./priceRow";
 
 export function CryptoPrices() {
-  const [prices, setPrices] = useState<Partial<Record<Symbol, string>>>({});
-
+  const [prices, setPrices] = useState<Partial<Record<Symbol, PriceData>>>({});
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
   const [subscribedSymbols, setSubscribedSymbols] =
@@ -47,10 +52,26 @@ export function CryptoPrices() {
       if ("data" in message) {
         const { s: symbol, p: price } = message.data;
 
-        setPrices((currentPrices) => ({
-          ...currentPrices,
-          [symbol]: price,
-        }));
+        setPrices((currentPrices) => {
+          const previousPrice = currentPrices[symbol]?.price;
+
+          const direction: PriceDirection =
+            previousPrice === undefined
+              ? "same"
+              : Number(price) > Number(previousPrice)
+                ? "up"
+                : Number(price) < Number(previousPrice)
+                  ? "down"
+                  : "same";
+
+          return {
+            ...currentPrices,
+            [symbol]: {
+              price,
+              direction,
+            },
+          };
+        });
 
         return;
       }
@@ -140,7 +161,7 @@ export function CryptoPrices() {
       </section>
 
       {subscribedSymbols.map((symbol) => (
-        <PriceRow key={symbol} symbol={symbol} price={prices[symbol]} />
+        <PriceRow key={symbol} symbol={symbol} data={prices[symbol]} />
       ))}
     </div>
   );
