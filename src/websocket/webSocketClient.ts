@@ -18,8 +18,8 @@ export class WebSocketClient {
   private handleClose?: CloseEventHandler;
 
   get isConnected(): boolean {
-  return this.ws?.readyState === WebSocket.OPEN;
-}
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
 
   constructor(private readonly url: string) {}
 
@@ -27,9 +27,9 @@ export class WebSocketClient {
     if (this.ws) {
       return;
     }
-    
+
     this.manuallyClosed = false;
-    
+
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = (event) => {
@@ -91,15 +91,16 @@ export class WebSocketClient {
   }
 
   private scheduleReconnect(): void {
-  const delay = Math.min(this.initialReconnectDelay * 2 ** this.reconnectAttempt,
-    this.maxReconnectDelay
-  );
+    const delay = Math.min(
+      this.initialReconnectDelay * 2 ** this.reconnectAttempt,
+      this.maxReconnectDelay,
+    );
 
-  this.reconnectAttempt++;
+    this.reconnectAttempt++;
 
-  this.reconnectTimer = setTimeout(() => {
-    this.reconnectTimer = null;
-    this.connect();
-  }, delay);
-}
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect();
+    }, delay);
+  }
 }
