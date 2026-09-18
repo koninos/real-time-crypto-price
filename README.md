@@ -1,75 +1,120 @@
-# React + TypeScript + Vite
+# Real-Time Crypto Prices
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small React and TypeScript application that displays real-time cryptocurrency prices using the Binance WebSocket API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Real-time cryptocurrency trade prices
+- Dynamic subscription and unsubscription to trading pairs
+- WebSocket connection status
+- Automatic reconnection with exponential backoff
+- Automatic restoration of subscriptions after reconnecting
+- Handling of Binance subscription confirmations and errors
+- Price direction indicators
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- TypeScript
+- Native WebSocket API
+- Vite
+- CSS
+- Vercel
 
-## Expanding the ESLint configuration
+No Binance API key is required. The application uses Binance's public market-data WebSocket streams.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Architecture
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+The application separates the WebSocket infrastructure from Binance-specific subscription logic and the React UI.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+React UI
+   ↓
+BinanceSubscriptionManager
+   ↓
+Binance Service
+   ↓
+WebSocketClient
+   ↓
+Binance WebSocket API
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### WebSocketClient
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`WebSocketClient` is responsible for the generic WebSocket lifecycle:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Opening and closing connections
+- Sending messages
+- Handling WebSocket events
+- Detecting unexpected disconnections
+- Reconnecting automatically
+- Applying exponential backoff between failed connection attempts
 
+It contains no Binance-specific logic.
+
+### Binance Service
+
+The Binance service contains the protocol-specific operations for subscribing and unsubscribing to Binance streams.
+
+This keeps Binance message construction outside the generic WebSocket client.
+
+### BinanceSubscriptionManager
+
+The subscription manager keeps track of the application's desired and confirmed subscriptions.
+
+It maintains:
+
+- Active subscriptions
+- Pending subscription/unsubscription requests
+- Binance request IDs
+
+A subscription isn't considered active until Binance confirms the request.
+
+This also allows rapid subscription changes to be handled without relying on optimistic state updates.
+
+## Getting Started
+
+### Requirements
+
+- Node.js
+- npm
+
+### Installation
+
+Clone the repository and install the dependencies:
+
+```bash
+npm install
+```
+
+### Development
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+### Build
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+### Lint
+
+Run ESLint:
+
+```bash
+npm run lint
+```
+
+### Preview
+
+Preview the production build locally:
+
+```bash
+npm run preview
 ```
