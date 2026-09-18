@@ -4,6 +4,7 @@ type CloseEventHandler = (event: CloseEvent) => void;
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
+  private manuallyClosed = false;
 
   private handleOpen?: EventHandler;
   private handleMessage?: MessageEventHandler;
@@ -20,7 +21,9 @@ export class WebSocketClient {
     if (this.ws) {
       return;
     }
-
+    
+    this.manuallyClosed = false;
+    
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = (event) => {
@@ -38,10 +41,17 @@ export class WebSocketClient {
     this.ws.onclose = (event) => {
       this.handleClose?.(event);
       this.ws = null;
+
+      if (!this.manuallyClosed) {
+        setTimeout(() => {
+          this.connect();
+        }, 1000);
+      }
     };
   }
 
   disconnect(): void {
+    this.manuallyClosed = true;
     this.ws?.close();
   }
 
