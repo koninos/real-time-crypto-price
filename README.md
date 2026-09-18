@@ -2,6 +2,8 @@
 
 A small React and TypeScript application that displays real-time cryptocurrency prices using the Binance WebSocket API.
 
+[Live Demo](https://real-time-crypto-price-eight.vercel.app/)
+
 ## Features
 
 - Real-time cryptocurrency trade prices
