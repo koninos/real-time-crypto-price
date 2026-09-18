@@ -102,6 +102,13 @@ Create a production build:
 ```bash
 npm run build
 ```
+### Test
+
+Run tests:
+
+```bash
+npm run test
+```
 
 ### Lint
 
