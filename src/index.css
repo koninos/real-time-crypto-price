@@ -1,21 +1,87 @@
 :root {
-  font: 18px;
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
+  /* Colors */
+  --color-background: #0b0e11;
+  --color-surface: #181a20;
+  --color-border: #2b3139;
+
+  --color-text-primary: #eaecef;
+  --color-text-secondary: #848e9c;
+  --color-text-muted: #b7bdc6;
+
+  --color-success: #0ecb81;
+  --color-danger: #f6465d;
+  --color-warning: #f0b90b;
+
+  /* Typography */
+  --font-family: system-ui, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  /* Borders */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+
+  font-family: var(--font-family);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
 
-#root {
-  margin: 0 auto;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  background: var(--color-background);
 }
 
 body {
   margin: 0;
+  min-width: 320px;
 }
 
-p {
-  margin: 0;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+label {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

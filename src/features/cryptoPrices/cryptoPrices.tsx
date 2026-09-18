@@ -1,3 +1,5 @@
+import "./cryptoPrices.css";
+
 import { useEffect, useRef, useState } from "react";
 
 import { AVAILABLE_SYMBOLS, INITIAL_SYMBOLS, STREAM_URL } from "./constants";
@@ -136,33 +138,50 @@ export function CryptoPrices() {
   };
 
   return (
-    <div>
-      <h1>Crypto Prices</h1>
-      <p>Status: {status}</p>
-      <hr />
+    <main className="crypto-prices">
+      <header className="crypto-prices__header">
+        <h1>Crypto Prices</h1>
+        <p>
+          Connection:{" "}
+          <span className={`status status--${status}`}>{status}</span>
+        </p>
+      </header>
 
-      <section>
-        <h2>Symbols</h2>
-        <ul>
+      <fieldset className="symbol-selector">
+        <legend>Select cryptocurrencies</legend>
+
+        <div className="symbol-selector__options">
           {AVAILABLE_SYMBOLS.map((symbol) => (
-            <li key={symbol}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={subscribedSymbols.includes(symbol)}
-                  onChange={() => toggleSymbol(symbol)}
-                />
-
-                {symbol}
-              </label>
-            </li>
+            <label key={symbol}>
+              <input
+                type="checkbox"
+                checked={subscribedSymbols.includes(symbol)}
+                onChange={() => toggleSymbol(symbol)}
+              />
+              <span>{symbol}</span>
+            </label>
           ))}
-        </ul>
-      </section>
+        </div>
+      </fieldset>
 
-      {subscribedSymbols.map((symbol) => (
-        <PriceRow key={symbol} symbol={symbol} data={prices[symbol]} />
-      ))}
-    </div>
+      <div className="price-table-wrapper">
+        <table className="price-table">
+          <caption>Live cryptocurrency prices</caption>
+
+          <thead>
+            <tr>
+              <th scope="col">Symbol</th>
+              <th scope="col">Price</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {subscribedSymbols.map((symbol) => (
+              <PriceRow key={symbol} symbol={symbol} data={prices[symbol]} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </main>
   );
 }

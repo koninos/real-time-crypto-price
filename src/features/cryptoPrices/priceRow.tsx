@@ -6,17 +6,34 @@ type PriceRowProps = {
   data?: PriceData;
 };
 
-export const PriceRow = memo(({ symbol, data }: PriceRowProps) => {
-  const { price, direction } = data || {};
+export const PriceRow = memo(function PriceRow({
+  symbol,
+  data,
+}: PriceRowProps) {
+  const directionLabel =
+    data?.direction === "up"
+      ? "price increased"
+      : data?.direction === "down"
+        ? "price decreased"
+        : "";
 
   return (
-    <div>
-      <strong>{symbol}</strong>{" "}
-      <span>
-        {price ? Number(price).toFixed(2) : "---"}
-        {direction === "up" && "↑"}
-        {direction === "down" && "↓"}
-      </span>
-    </div>
+    <tr>
+      <th scope="row">{symbol}</th>
+
+      <td className={`price price--${data?.direction ?? "same"}`}>
+        {data ? Number(data.price).toFixed(2) : "---"}
+
+        {data?.direction !== "same" && (
+          <>
+            {" "}
+            <span aria-hidden="true">
+              {data?.direction === "up" ? "↑" : "↓"}
+            </span>
+            <span className="sr-only">{directionLabel}</span>
+          </>
+        )}
+      </td>
+    </tr>
   );
 });

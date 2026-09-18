@@ -1,0 +1,140 @@
+.crypto-prices {
+  min-height: 100vh;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.crypto-prices__header {
+  max-width: 900px;
+  margin: 0 auto var(--spacing-2xl);
+  text-align: center;
+}
+
+.crypto-prices__header h1 {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 32px;
+}
+
+.crypto-prices__header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.status {
+  font-weight: 600;
+}
+
+.status--connected {
+  color: var(--color-success);
+}
+
+.status--error,
+.status--disconnected {
+  color: var(--color-danger);
+}
+
+.status--connecting {
+  color: var(--color-warning);
+}
+
+.symbol-selector {
+  max-width: 900px;
+  margin: 0 auto var(--spacing-xl);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+}
+
+.symbol-selector legend {
+  padding: 0 var(--spacing-sm);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.symbol-selector__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.symbol-selector label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.price-table-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+}
+
+.price-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.price-table th:first-child,
+.price-table td:first-child {
+  width: 50%;
+}
+
+.price-table th:last-child,
+.price-table td:last-child {
+  width: 50%;
+}
+
+.price-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.price-table th,
+.price-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.price-table thead th {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.price-table tbody th {
+  font-weight: 600;
+}
+
+.price-table tbody tr:last-child th,
+.price-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.price--up {
+  color: var(--color-success);
+}
+
+.price--down {
+  color: var(--color-danger);
+}
+
+.price--same {
+  color: var(--color-text-primary);
+}
