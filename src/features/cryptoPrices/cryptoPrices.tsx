@@ -56,7 +56,10 @@ export function CryptoPrices() {
       }
 
       if ("result" in message) {
-        subscriptionManager.handleResponse(message.id);
+        subscriptionManager.handleResponse(
+          message.id,
+          subscribedSymbolsRef.current,
+        );
 
         return;
       }

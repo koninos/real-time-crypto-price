@@ -43,7 +43,7 @@ export class BinanceSubscriptionManager {
     }
   }
 
-  handleResponse(id: number): void {
+  handleResponse(id: number, desiredSymbols: Symbol[]): void {
     const pendingRequest = this.pendingRequests.get(id);
 
     if (!pendingRequest) {
@@ -61,6 +61,8 @@ export class BinanceSubscriptionManager {
     }
 
     this.pendingRequests.delete(id);
+
+    this.synchronize(desiredSymbols);
   }
 
   onConnected(desiredSymbols: Symbol[]): void {
