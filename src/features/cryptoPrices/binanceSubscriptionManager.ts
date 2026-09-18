@@ -1,15 +1,11 @@
-
 import type { WebSocketClient } from "../../websocket/webSocketClient";
 import { subscribe, unsubscribe } from "./binanceService";
 import type { PendingRequest, Symbol } from "./types";
 
-
-
 export class BinanceSubscriptionManager {
   private readonly activeSubscriptions = new Set<Symbol>();
 
-  private readonly pendingRequests =
-    new Map<number, PendingRequest>();
+  private readonly pendingRequests = new Map<number, PendingRequest>();
 
   private requestId = 1;
 
@@ -23,15 +19,12 @@ export class BinanceSubscriptionManager {
     const symbolsToSubscribe = desiredSymbols.filter(
       (symbol) =>
         !this.activeSubscriptions.has(symbol) &&
-        !this.hasPendingRequest(symbol)
+        !this.hasPendingRequest(symbol),
     );
 
-    const symbolsToUnsubscribe = Array.from(
-      this.activeSubscriptions
-    ).filter(
+    const symbolsToUnsubscribe = Array.from(this.activeSubscriptions).filter(
       (symbol) =>
-        !desiredSymbols.includes(symbol) &&
-        !this.hasPendingRequest(symbol)
+        !desiredSymbols.includes(symbol) && !this.hasPendingRequest(symbol),
     );
 
     if (symbolsToSubscribe.length > 0) {
@@ -66,12 +59,12 @@ export class BinanceSubscriptionManager {
   }
 
   handleError(id?: number): void {
-  if (id === undefined) {
-    return;
-  }
+    if (id === undefined) {
+      return;
+    }
 
-  this.pendingRequests.delete(id);
-}
+    this.pendingRequests.delete(id);
+  }
 
   onConnected(desiredSymbols: Symbol[]): void {
     this.reset();
@@ -106,10 +99,8 @@ export class BinanceSubscriptionManager {
   }
 
   private hasPendingRequest(symbol: Symbol): boolean {
-    return Array.from(
-      this.pendingRequests.values()
-    ).some((request) =>
-      request.symbols.includes(symbol)
+    return Array.from(this.pendingRequests.values()).some((request) =>
+      request.symbols.includes(symbol),
     );
   }
 }
