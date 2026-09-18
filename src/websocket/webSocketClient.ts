@@ -6,6 +6,12 @@ export class WebSocketClient {
   private ws: WebSocket | null = null;
   private manuallyClosed = false;
 
+  private reconnectAttempt = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private readonly initialReconnectDelay = 1000;
+  private readonly maxReconnectDelay = 30000;
+
   private handleOpen?: EventHandler;
   private handleMessage?: MessageEventHandler;
   private handleError?: EventHandler;
@@ -27,6 +33,7 @@ export class WebSocketClient {
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = (event) => {
+      this.reconnectAttempt = 0;
       this.handleOpen?.(event);
     };
 
@@ -43,15 +50,19 @@ export class WebSocketClient {
       this.ws = null;
 
       if (!this.manuallyClosed) {
-        setTimeout(() => {
-          this.connect();
-        }, 1000);
+        this.scheduleReconnect();
       }
     };
   }
 
   disconnect(): void {
     this.manuallyClosed = true;
+
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     this.ws?.close();
   }
 
@@ -78,4 +89,17 @@ export class WebSocketClient {
   onClose(handler: CloseEventHandler): void {
     this.handleClose = handler;
   }
+
+  private scheduleReconnect(): void {
+  const delay = Math.min(this.initialReconnectDelay * 2 ** this.reconnectAttempt,
+    this.maxReconnectDelay
+  );
+
+  this.reconnectAttempt++;
+
+  this.reconnectTimer = setTimeout(() => {
+    this.reconnectTimer = null;
+    this.connect();
+  }, delay);
+}
 }
